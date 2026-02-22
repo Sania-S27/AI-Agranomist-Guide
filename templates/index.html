@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agronomist Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = { theme: { extend: { colors: { emerald: { 50: '#ecfdf5', 800: '#065f46', 900: '#022c22' }, earth: { 100: '#f5f5f4', 200: '#e7e5e4', 800: '#44403c', 900: '#292524' }, accent: '#d97706' } } } }
+    </script>
+</head>
+<body class="bg-earth-100 h-screen flex p-6 gap-6 font-sans text-earth-800">
+
+    <div class="flex-1 bg-white rounded-2xl shadow-lg border border-earth-200 flex flex-col overflow-hidden">
+        <div class="bg-emerald-900 p-4 text-white flex items-center gap-3">
+            <i class="fa-solid fa-robot text-2xl text-accent"></i>
+            <div>
+                <h1 class="font-bold text-lg">AI Agronomist Agent</h1>
+                <p class="text-xs text-emerald-200">Real-time Analysis & Tips</p>
+            </div>
+        </div>
+        
+        <div id="chat-box" class="flex-1 p-6 overflow-y-auto space-y-4 bg-emerald-50">
+            <div class="flex gap-3">
+                <div class="bg-emerald-800 text-white rounded-full h-8 w-8 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-leaf"></i></div>
+                <div class="bg-white p-4 rounded-xl rounded-tl-none shadow-sm border border-emerald-100 max-w-[85%] text-base leading-relaxed">
+                    Hello! Enter your farm details on the right, and click "Calculate" to check crop suitability and generate your yield predictions!
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 bg-white border-t border-earth-200 flex gap-2">
+            <input type="text" id="user-input" placeholder="Ask a follow-up question..." class="flex-1 bg-earth-100 border border-earth-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-800 text-base" onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()" class="bg-emerald-800 hover:bg-emerald-900 text-white px-6 py-2 rounded-lg transition font-semibold shadow-md">Send</button>
+        </div>
+    </div>
+
+    <div class="w-[400px] flex flex-col gap-4">
+        
+        <div class="bg-white rounded-2xl shadow-lg border border-earth-200 p-6">
+            <h2 class="text-xl font-bold text-earth-900 border-b pb-2 mb-4"><i class="fa-solid fa-sliders text-emerald-800 mr-2"></i> Farm Controls</h2>
+            
+            <div class="space-y-4">
+                <div class="flex flex-col">
+                    <label class="text-xs font-semibold text-earth-800 mb-1 uppercase tracking-wide">Location</label>
+                    <select id="drop-state" class="bg-earth-100 border border-earth-200 text-base rounded-lg p-2 focus:ring-2 focus:ring-emerald-800 outline-none">
+                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                        <option value="Assam">Assam</option>
+                        <option value="Bihar">Bihar</option>
+                        <option value="Chhattisgarh">Chhattisgarh</option>
+                        <option value="Goa">Goa</option>
+                        <option value="Gujarat">Gujarat</option>
+                        <option value="Haryana">Haryana</option>
+                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                        <option value="Jharkhand">Jharkhand</option>
+                        <option value="Karnataka" selected>Karnataka</option>
+                        <option value="Kerala">Kerala</option>
+                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                        <option value="Maharashtra">Maharashtra</option>
+                        <option value="Manipur">Manipur</option>
+                        <option value="Meghalaya">Meghalaya</option>
+                        <option value="Mizoram">Mizoram</option>
+                        <option value="Nagaland">Nagaland</option>
+                        <option value="Odisha">Odisha</option>
+                        <option value="Punjab">Punjab</option>
+                        <option value="Rajasthan">Rajasthan</option>
+                        <option value="Sikkim">Sikkim</option>
+                        <option value="Tamil Nadu">Tamil Nadu</option>
+                        <option value="Telangana">Telangana</option>
+                        <option value="Tripura">Tripura</option>
+                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                        <option value="Uttarakhand">Uttarakhand</option>
+                        <option value="West Bengal">West Bengal</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-xs font-semibold text-earth-800 mb-1 uppercase tracking-wide">Experience Level</label>
+                    <select id="drop-exp" class="bg-earth-100 border border-earth-200 text-base rounded-lg p-2 focus:ring-2 focus:ring-emerald-800 outline-none">
+                        <option value="Beginner">Beginner (0-2 years)</option>
+                        <option value="Intermediate">Intermediate (3-5 years)</option>
+                        <option value="Advanced">Advanced (5+ years)</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-xs font-semibold text-earth-800 mb-1 uppercase tracking-wide">Target Crop</label>
+                    <input type="text" id="drop-crop" placeholder="e.g. Sugarcane, Apples..." class="bg-earth-100 border border-earth-200 text-base rounded-lg p-2 focus:ring-2 focus:ring-emerald-800 outline-none">
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-xs font-semibold text-earth-800 mb-1 uppercase tracking-wide">Farm Area (Acres)</label>
+                    <input type="number" id="drop-area" placeholder="e.g. 2" value="2" class="bg-earth-100 border border-earth-200 text-base rounded-lg p-2 focus:ring-2 focus:ring-emerald-800 outline-none">
+                </div>
+
+                <button onclick="syncProfile()" class="w-full bg-accent hover:bg-yellow-600 text-white mt-4 px-4 py-3 rounded-lg transition font-bold shadow-md flex justify-center items-center gap-2">
+                    <i class="fa-solid fa-calculator"></i> Calculate Yield & Tips
+                </button>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-4 flex-1">
+            
+            <div class="bg-emerald-800 rounded-2xl shadow-lg p-5 text-white flex flex-col justify-center items-center text-center flex-1">
+                <h2 class="text-xs text-emerald-200 font-bold mb-1 uppercase tracking-wider">Total Expected Yield</h2>
+                <h3 id="ui-yield" class="text-3xl font-black mt-1">--</h3>
+            </div>
+
+            <div class="bg-emerald-900 rounded-2xl shadow-lg p-5 text-white flex flex-col justify-center items-center text-center flex-1">
+                <h2 class="text-xs text-emerald-200 font-bold mb-1 uppercase tracking-wider">Est. Market Value</h2>
+                <h3 id="ui-profit" class="text-3xl font-black text-accent mt-1">--</h3>
+                <p class="text-[10px] text-emerald-100 mt-2 opacity-70"><i class="fa-solid fa-chart-line mr-1"></i> Live via Yahoo Finance</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function getProfileData() {
+            return {
+                state: document.getElementById('drop-state').value,
+                experience: document.getElementById('drop-exp').value,
+                crop: document.getElementById('drop-crop').value.trim(),
+                area: parseFloat(document.getElementById('drop-area').value) || null
+            };
+        }
+
+        async function syncProfile() {
+            const stateData = getProfileData();
+            if(!stateData.crop || !stateData.area) {
+                alert("Please enter a Target Crop and Farm Area!");
+                return;
+            }
+
+            const typingId = addMessageToChat(`Analyzing suitability for ${stateData.area} acres of ${stateData.crop} in ${stateData.state}...`, 'bot', true);
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ current_state: stateData, is_dropdown_update: true })
+                });
+                const data = await response.json();
+                
+                document.getElementById(typingId).remove();
+                const formattedReply = data.reply.replace(/\n/g, '<br>').replace(/- /g, '&bull; ');
+                addMessageToChat(formattedReply, 'bot');
+                
+                document.getElementById('ui-profit').innerText = data.ui_data.estimated_profit;
+                document.getElementById('ui-yield').innerText = data.ui_data.total_yield;
+            } catch (error) { 
+                console.error("Sync error:", error); 
+                document.getElementById(typingId).remove();
+                addMessageToChat("Error connecting to server.", 'bot');
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessageToChat(message, 'user');
+            input.value = '';
+
+            const typingId = addMessageToChat("Consulting agronomy data...", 'bot', true);
+            const stateData = getProfileData();
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message, current_state: stateData, is_dropdown_update: false })
+                });
+                
+                const data = await response.json();
+                document.getElementById(typingId).remove();
+
+                const formattedReply = data.reply.replace(/\n/g, '<br>').replace(/- /g, '&bull; ');
+                addMessageToChat(formattedReply, 'bot');
+
+                if (data.ui_data) {
+                    if(data.ui_data.experience) document.getElementById('drop-exp').value = data.ui_data.experience;
+                    if(data.ui_data.crop) document.getElementById('drop-crop').value = data.ui_data.crop;
+                    if(data.ui_data.area) document.getElementById('drop-area').value = data.ui_data.area;
+                    if(data.ui_data.state) document.getElementById('drop-state').value = data.ui_data.state;
+                    
+                    document.getElementById('ui-profit').innerText = data.ui_data.estimated_profit;
+                    document.getElementById('ui-yield').innerText = data.ui_data.total_yield;
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById(typingId).remove();
+                addMessageToChat("Error connecting to AI.", 'bot');
+            }
+        }
+
+        function addMessageToChat(text, sender, isTyping = false) {
+            const box = document.getElementById('chat-box');
+            const div = document.createElement('div');
+            const uniqueId = 'msg-' + Date.now();
+            div.id = uniqueId;
+            
+            if (sender === 'user') {
+                div.className = "flex gap-3 justify-end";
+                div.innerHTML = `<div class="bg-emerald-800 text-white p-3 rounded-xl rounded-tr-none shadow-sm max-w-[80%] text-base">${text}</div>
+                                 <div class="bg-earth-200 text-earth-800 rounded-full h-8 w-8 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-user"></i></div>`;
+            } else {
+                div.className = "flex gap-3";
+                const opacity = isTyping ? "opacity-60 italic" : "";
+                div.innerHTML = `<div class="bg-emerald-800 text-white rounded-full h-8 w-8 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-leaf"></i></div>
+                                 <div class="bg-white p-4 rounded-xl rounded-tl-none shadow-sm border border-emerald-100 max-w-[85%] text-base leading-relaxed ${opacity}">${text}</div>`;
+            }
+            
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+            return uniqueId;
+        }
+
+        function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
+    </script>
+</body>
+</html>
